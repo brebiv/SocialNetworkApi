@@ -7,4 +7,5 @@ urlpatterns = [
     path('register/', views.register_user, name='register_user'),
     path('login/', obtain_auth_token, name='login'),
     path('posts/', views.create_post, name='create_post'),
+    path('like/<int:post_id>/', views.like_post, name='like_post'),
 ]
