@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from .serializers import UserSerializer, RegistrationSerializer, PostCreateSerializer, PostSerializer
-from .models import Post
+from .models import Post, Like
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -50,13 +50,41 @@ def create_post(request):
 @permission_classes([IsAuthenticated])
 def like_post(request, post_id):
     data = {}
+    user = request.user
     try:
         post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
         data['message'] = "Post Does Not Exist"
         return Response(data, status.HTTP_404_NOT_FOUND)
 
-    post.likes += 1
-    post.save()
-    data['message'] = "Post liked successfuly"
+    try:
+        like = Like.objects.get(pk=post_id, user=user)
+        data['message'] = "You already liked this post"
+    except Like.DoesNotExist:
+        print("Like does not exist")
+        print(user)
+        print(post)
+        like = Like.objects.create(user=user, post=post)
+        like.save()
+        data['message'] = "Post liked successfuly"
     return Response(data, status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def dislike_post(request, post_id):
+    data = {}
+    user = request.user
+
+    try:
+        post = Post.objects.get(pk=post_id)
+        like = Like.objects.get(user=user, post=post)
+    except Post.DoesNotExist:
+        data['message'] = "Post doest not exist"
+        return Response(data, status.HTTP_404_NOT_FOUND)
+    except Like.DoesNotExist:
+        data['message'] = "You didn't like this post"
+        return Response(data, status.HTTP_404_NOT_FOUND)
+    else:
+        like.delete()
+        data['message'] = "Like deleted successfuly"
+        return Response(data, status.HTTP_204_NO_CONTENT)

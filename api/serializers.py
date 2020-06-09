@@ -21,6 +21,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
         )
         user.set_password(self.validated_data['password'])
         user.save()
+        #soc_user = SocialUser(user=user)
+        #soc_user.save()
         return user
 
 
@@ -36,3 +38,4 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['content', 'likes', 'author']
+
