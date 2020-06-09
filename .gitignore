@@ -7,3 +7,6 @@ venv
 # Python cache
 *.pyc
 __pycache__
+
+# Migrations
+migrations
