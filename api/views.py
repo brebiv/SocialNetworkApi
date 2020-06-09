@@ -58,7 +58,7 @@ def like_post(request, post_id):
         return Response(data, status.HTTP_404_NOT_FOUND)
 
     try:
-        like = Like.objects.get(pk=post_id, user=user)
+        like = Like.objects.get(post=post, user=user)
         data['message'] = "You already liked this post"
     except Like.DoesNotExist:
         print("Like does not exist")
