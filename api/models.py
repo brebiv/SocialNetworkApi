@@ -15,11 +15,6 @@ class Post(models.Model):
     likes = models.IntegerField(verbose_name='likes', default=0)
 
 
-#class SocialUser(models.Model):
-#    user = models.OneToOneField(User, on_delete=models.CASCADE)
-#    liked_posts = models.ForeignKey(Post, on_delete=models.DO_NOTHING, blank=True, null=True)
-
-
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, unique=False)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, unique=False)
