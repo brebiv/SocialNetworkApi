@@ -12,7 +12,6 @@ class Post(models.Model):
     content = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name="posts")
-    likes = models.IntegerField(verbose_name='likes', default=0)
 
 
 class Like(models.Model):

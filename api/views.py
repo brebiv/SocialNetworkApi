@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from .serializers import UserSerializer, RegistrationSerializer, PostCreateSerializer, PostSerializer
+from .serializers import UserSerializer, RegistrationSerializer, PostCreateSerializer, PostSerializer, LikeSerializer
 from .models import Post, Like
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -8,11 +8,17 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
+from django.core.exceptions import ValidationError
+import datetime
+
+from . import utils
+
 
 # Create your views here.
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def user_list(request):
+    utils.track_user(request.user)
     qs = User.objects.all()
     serializer = UserSerializer(qs, many=True)
     return Response(serializer.data)
@@ -32,6 +38,7 @@ def register_user(request):
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def create_post(request):
+    utils.track_user(request.user)
     if request.method == "GET":
         qs = Post.objects.all()
         serializer = PostSerializer(qs, many=True)
@@ -49,6 +56,7 @@ def create_post(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def like_post(request, post_id):
+    utils.track_user(request.user)
     data = {}
     user = request.user
     try:
@@ -72,9 +80,9 @@ def like_post(request, post_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def dislike_post(request, post_id):
+    utils.track_user(request.user)
     data = {}
     user = request.user
-
     try:
         post = Post.objects.get(pk=post_id)
         like = Like.objects.get(user=user, post=post)
@@ -88,3 +96,24 @@ def dislike_post(request, post_id):
         like.delete()
         data['message'] = "Like deleted successfuly"
         return Response(data, status.HTTP_204_NO_CONTENT)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def like_analitics(request):
+    # analitics/?date_from=2020-02-02&date_to=2020-02-15
+    data = {}
+    try:
+        date_from = request.GET['date_from']
+        date_to = request.GET['date_to']
+        likes = Like.objects.filter(date_liked__range=(date_from, date_to))
+    except KeyError:
+        data['message'] = "Wrong request"
+        return Response(data, status.HTTP_400_BAD_REQUEST)
+    except Post.DoesNotExist:
+        data['message'] = "Not posts'he been liked in that period"
+        return Response(data, status.HTTP_404_NOT_FOUND)
+    except ValidationError:
+        data['message'] = "Invalid format. It must be in YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]"
+        return Response(data, status.HTTP_400_BAD_REQUEST)
+    serializer = LikeSerializer(likes, many=True)
+    return Response(serializer.data, status.HTTP_200_OK)

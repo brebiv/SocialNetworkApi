@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Like
 from rest_framework import serializers
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'date_joined', 'last_login']
+        fields = ['id', 'username', 'date_joined', 'last_login']
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -35,5 +35,10 @@ class PostCreateSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['content', 'likes', 'author']
+        fields = ['content', 'author', 'date_created']
 
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ['user', 'post', 'date_liked']
