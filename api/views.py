@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.utils import timezone
 from .serializers import UserSerializer, RegistrationSerializer, PostCreateSerializer, PostSerializer, LikeSerializer
 from .models import Post, Like
 from rest_framework.decorators import api_view, permission_classes
@@ -38,12 +39,12 @@ def register_user(request):
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def create_post(request):
-    utils.track_user(request.user)
     if request.method == "GET":
         qs = Post.objects.all()
         serializer = PostSerializer(qs, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
     elif request.method == "POST":
+        utils.track_user(request.user)
         serializer = PostCreateSerializer(data=request.data)
         data = {}
         if serializer.is_valid():
