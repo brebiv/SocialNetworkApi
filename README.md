@@ -5,9 +5,9 @@ API for twitter like social network.
 ## Installation
 
 ```bash
-pip install -r requirements.txt
 git clone https://github.com/brebiv/SocialNetworkApi
 cd SocialNetworkApi
+pip install -r requirements.txt
 python manage.py makemigrations && python manage.py migrate
 python manage.py runserver
 ```
