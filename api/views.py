@@ -31,7 +31,7 @@ def register_user(request):
     if serializer.is_valid():
         user = serializer.save()
         data['message'] = "User successfuly created!"
-        data['token'] = Token.objects.get(user=user).key
+        #data['token'] = Token.objects.get(user=user).key
         return Response(data, status.HTTP_201_CREATED)
     return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
